@@ -18,7 +18,7 @@ interface ReactorInterface
      *
      * @param callable $listener
      */
-    public function addTask(callable $listener): void;
+    public function addSooner(callable $listener): void;
 
     /**
      * 设置读事件侦听器

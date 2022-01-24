@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Loner\Reactor;
 
 use Loner\Reactor\SignalHandler\SignalHandler;
-use Loner\Reactor\Task\TaskSet;
-use Loner\Reactor\Timer\{Scheduler, Timer, TimerInterface};
+use Loner\Reactor\Sooner\SoonerScheduler;
+use Loner\Reactor\Timer\{TimerScheduler, Timer, TimerInterface};
 
 /**
  * 备用事件循环
@@ -16,18 +16,18 @@ use Loner\Reactor\Timer\{Scheduler, Timer, TimerInterface};
 class Select implements ReactorInterface
 {
     /**
-     * 任务集
+     * 优先任务调度程序
      *
-     * @var TaskSet
+     * @var SoonerScheduler
      */
-    private TaskSet $taskSet;
+    private SoonerScheduler $soonerScheduler;
 
     /**
-     * 计时器调度程序
+     * 计时任务调度程序
      *
-     * @var Scheduler
+     * @var TimerScheduler
      */
-    private Scheduler $scheduler;
+    private TimerScheduler $timerScheduler;
 
     /**
      * 信号处理程序
@@ -83,8 +83,8 @@ class Select implements ReactorInterface
      */
     public function __construct()
     {
-        $this->taskSet = new TaskSet();
-        $this->scheduler = new Scheduler();
+        $this->soonerScheduler = new SoonerScheduler();
+        $this->timerScheduler = new TimerScheduler();
         $this->signalHandler = new SignalHandler();
 
         $this->signalAvailable = function_exists('pcntl_signal') && function_exists('pcntl_signal_dispatch');
@@ -97,9 +97,9 @@ class Select implements ReactorInterface
     /**
      * @inheritDoc
      */
-    public function addTask(callable $listener): void
+    public function addSooner(callable $listener): void
     {
-        $this->taskSet->add($listener);
+        $this->soonerScheduler->add($listener);
     }
 
     /**
@@ -143,7 +143,7 @@ class Select implements ReactorInterface
     public function setTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface
     {
         $timer = new Timer($interval, $listener, $periodic);
-        $this->scheduler->add($timer);
+        $this->timerScheduler->add($timer);
         return $timer;
     }
 
@@ -187,7 +187,7 @@ class Select implements ReactorInterface
      */
     public function delTimer(TimerInterface $timer): bool
     {
-        $this->scheduler->del($timer);
+        $this->timerScheduler->del($timer);
         return true;
     }
 
@@ -199,14 +199,16 @@ class Select implements ReactorInterface
         $this->looping = true;
 
         while ($this->looping) {
-            $this->scheduler->tick();
+            $this->soonerScheduler->tick();
+
+            $this->timerScheduler->tick();
 
             // 循环状态异常，则流事件监听等待时间置0，立即判断并处理
             if (!$this->looping) {
                 $timeout = 0;
             } // 若有最近计时器，格式化流事件监听等待时间
-            elseif ($scheduledAt = $this->scheduler->getFirst()) {
-                $timeout = $scheduledAt - $this->scheduler->getTime();
+            elseif ($scheduledAt = $this->timerScheduler->getFirst()) {
+                $timeout = $scheduledAt - $this->timerScheduler->getTime();
                 if ($timeout > 0) {
                     // 转为微秒、整型
                     $timeout *= 1000000;

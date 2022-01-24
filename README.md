@@ -20,10 +20,10 @@ composer require loner/reactor
     // 事件反应驱动对象
     $reactor = Builder::create();
 * 事件侦听
-    * 添加任务（下次事件循环优先处理）
+    * 添加优先任务（下次事件循环优先处理）
 
         ```php
-        $reactor->addTask(callable $listener): void;
+        $reactor->addSooner(callable $listener): void;
           # 内部回调
           $listener();
         ```

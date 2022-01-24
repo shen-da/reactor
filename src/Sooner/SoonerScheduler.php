@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Loner\Reactor\Task;
+namespace Loner\Reactor\Sooner;
 
 use SplQueue;
 
 /**
- * 任务集
+ * 优先任务调度器
  *
- * @package Loner\Reactor\Task
+ * @package Loner\Reactor\Sooner
  */
-class TaskSet
+class SoonerScheduler
 {
     /**
      * 任务队列

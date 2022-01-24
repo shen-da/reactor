@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Loner\Reactor\Timer;
 
 /**
- * 计时器调度
+ * 计时任务调度器
  *
  * @package Loner\Reactor\Timer
  */
-class Scheduler
+class TimerScheduler
 {
     /**
      * 记录时间
