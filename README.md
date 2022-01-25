@@ -65,7 +65,7 @@ composer require loner/reactor
         ```php
         # 增：秒数、回调、是否周期性
         # Loner\Reactor\Timer\TimerInterface
-        $reactor->setTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface;
+        $reactor->addTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface;
           # 内部回调
           $listener(TimerInterface $timer);
       

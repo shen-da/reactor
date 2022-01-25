@@ -79,19 +79,27 @@ class Select implements ReactorInterface
     private bool $looping = false;
 
     /**
-     * 初始化计时器处理程序和信号处理程序
+     * 初始化处理程序
      */
     public function __construct()
     {
-        $this->soonerScheduler = new SoonerScheduler();
-        $this->timerScheduler = new TimerScheduler();
-        $this->signalHandler = new SignalHandler();
+        $this->initialize();
 
         $this->signalAvailable = function_exists('pcntl_signal') && function_exists('pcntl_signal_dispatch');
 
         if ($this->signalAvailable && function_exists('pcntl_async_signals')) {
             pcntl_async_signals(true);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function initialize(): void
+    {
+        $this->soonerScheduler = new SoonerScheduler();
+        $this->timerScheduler = new TimerScheduler();
+        $this->signalHandler = new SignalHandler();
     }
 
     /**
@@ -140,7 +148,7 @@ class Select implements ReactorInterface
     /**
      * @inheritDoc
      */
-    public function setTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface
+    public function addTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface
     {
         $timer = new Timer($interval, $listener, $periodic);
         $this->timerScheduler->add($timer);

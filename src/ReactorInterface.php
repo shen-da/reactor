@@ -14,7 +14,12 @@ use Loner\Reactor\Timer\TimerInterface;
 interface ReactorInterface
 {
     /**
-     * 添加任务
+     * 初始化处理程序
+     */
+    public function initialize(): void;
+
+    /**
+     * 添加优先任务侦听器
      *
      * @param callable $listener
      */
@@ -50,12 +55,12 @@ interface ReactorInterface
     /**
      * 添加计时器事件侦听器
      *
-     * @param int $interval
+     * @param float $interval
      * @param callable $listener
      * @param bool $periodic
      * @return TimerInterface
      */
-    public function setTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface;
+    public function addTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface;
 
     /**
      * 移除读事件侦听器
