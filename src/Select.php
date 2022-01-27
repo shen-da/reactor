@@ -274,14 +274,14 @@ class Select implements ReactorInterface
             foreach ($read as $stream) {
                 $key = (int)$stream;
                 if (isset($this->readListeners[$key])) {
-                    call_user_func($this->readListeners[$key], $stream);
+                    $this->readListeners[$key]($stream);
                 }
             }
 
             foreach ($write as $stream) {
                 $key = (int)$stream;
                 if (isset($this->writeListeners[$key])) {
-                    call_user_func($this->writeListeners[$key], $stream);
+                    $this->writeListeners[$key]($stream);
                 }
             }
         }

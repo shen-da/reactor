@@ -46,7 +46,7 @@ class SoonerScheduler
         $count = $this->queue->count();
 
         while ($count--) {
-            call_user_func($this->queue->dequeue());
+            $this->queue->dequeue()();
         }
     }
 

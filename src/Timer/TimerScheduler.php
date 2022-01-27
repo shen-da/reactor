@@ -137,7 +137,7 @@ class TimerScheduler
 
             // 计时器侦听回调
             $timer = $this->timers[$id];
-            call_user_func($timer->getListener(), $timer);
+            $timer->getListener()($timer);
 
             // 周期性计时器，且未被删除，则重新安排时间；否则删除
             if ($timer->isPeriodic() && isset($this->timers[$id])) {

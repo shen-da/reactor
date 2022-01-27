@@ -55,7 +55,7 @@ class SignalHandler
     public function call(int $signal): void
     {
         if ($this->has($signal)) {
-            call_user_func($this->signals[$signal], $signal);
+            $this->signals[$signal]($signal);
         }
     }
 
