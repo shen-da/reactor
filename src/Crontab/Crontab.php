@@ -62,7 +62,7 @@ class Crontab
      */
     public static function getFormat(int $time = null): array
     {
-        return explode('', date('i G j n w', $time ?? time()));
+        return explode(' ', date('i G j n w', $time ?? time()));
     }
 
     /**
