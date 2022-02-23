@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Loner\Reactor\Exception;
 
 use Exception;
-use Throwable;
 
 /**
  * 异常：定时任务时间规则错误
  *
  * @package Loner\Reactor\Exception
  */
-class CrontabFormatException extends Exception implements Throwable
+class CrontabFormatException extends Exception implements ExceptionInterface
 {
     /**
      * 错误码：格式错误
