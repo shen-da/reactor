@@ -309,7 +309,7 @@ class Select implements ReactorInterface
         }
 
         // 等待流事件，屏蔽被信号中断时的警告
-        $ret = @stream_select($read, $write, $except, $timeout === null ? null : 0, $timeout);
+        $ret = @stream_select($read, $write, $except, $timeout === null ? null : 0, (int)$timeout);
 
         if ($except) {
             $write = array_merge($write, $except);
