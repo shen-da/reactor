@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Loner\Reactor;
 
+use Loner\Reactor\Crontab\{Crontab, CrontabScheduler};
 use Loner\Reactor\SignalHandler\SignalHandler;
 use Loner\Reactor\Sooner\SoonerScheduler;
-use Loner\Reactor\Timer\{TimerScheduler, Timer, TimerInterface};
+use Loner\Reactor\Timer\{TimerScheduler, Timer};
 
 /**
  * 备用事件循环
@@ -28,6 +29,13 @@ class Select implements ReactorInterface
      * @var TimerScheduler
      */
     private TimerScheduler $timerScheduler;
+
+    /**
+     * 计时任务调度程序
+     *
+     * @var CrontabScheduler
+     */
+    private CrontabScheduler $crontabScheduler;
 
     /**
      * 信号处理程序
@@ -99,6 +107,7 @@ class Select implements ReactorInterface
     {
         $this->soonerScheduler = new SoonerScheduler();
         $this->timerScheduler = new TimerScheduler();
+        $this->crontabScheduler = new CrontabScheduler();
         $this->signalHandler = new SignalHandler();
     }
 
@@ -148,11 +157,21 @@ class Select implements ReactorInterface
     /**
      * @inheritDoc
      */
-    public function addTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface
+    public function addTimer(float $interval, callable $listener, bool $periodic = false): Timer
     {
         $timer = new Timer($interval, $listener, $periodic);
         $this->timerScheduler->add($timer);
         return $timer;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addCrontab(callable $listener, string ...$timeRules): Crontab
+    {
+        $crontab = new Crontab($listener, ...$timeRules);
+        $this->crontabScheduler->add($crontab);
+        return $crontab;
     }
 
     /**
@@ -193,9 +212,18 @@ class Select implements ReactorInterface
     /**
      * @inheritDoc
      */
-    public function delTimer(TimerInterface $timer): bool
+    public function delTimer(Timer $timer): bool
     {
         $this->timerScheduler->del($timer);
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delCrontab(Crontab $crontab): bool
+    {
+        $this->crontabScheduler->del($crontab);
         return true;
     }
 
@@ -208,8 +236,8 @@ class Select implements ReactorInterface
 
         while ($this->looping) {
             $this->soonerScheduler->tick();
-
             $this->timerScheduler->tick();
+            $this->crontabScheduler->tick();
 
             // 循环状态异常，则流事件监听等待时间置0，立即判断并处理
             if (!$this->looping) {
@@ -224,6 +252,9 @@ class Select implements ReactorInterface
                 } else {
                     $timeout = 0;
                 }
+            } // 若有定时任务
+            elseif (!$this->crontabScheduler->isEmpty()) {
+                $timeout = 60 * 1000000;
             } // 仅有待监听流或信号，则将流等待时间置空，代表尽可能大
             elseif ($this->readStreams || $this->writeStreams || !$this->signalHandler->isEmpty()) {
                 $timeout = null;

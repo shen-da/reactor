@@ -9,7 +9,7 @@ namespace Loner\Reactor\Timer;
  *
  * @package Loner\Reactor\Timer
  */
-class Timer implements TimerInterface
+class Timer
 {
     /**
      * 最小间隙时间（1us）
@@ -52,7 +52,9 @@ class Timer implements TimerInterface
     }
 
     /**
-     * @inheritDoc
+     * 返回间隔时间（微秒）
+     *
+     * @return float
      */
     public function getInterval(): float
     {
@@ -60,7 +62,9 @@ class Timer implements TimerInterface
     }
 
     /**
-     * @inheritDoc
+     * 返回侦听回调
+     *
+     * @return callable
      */
     public function getListener(): callable
     {
@@ -68,7 +72,9 @@ class Timer implements TimerInterface
     }
 
     /**
-     * @inheritDoc
+     * 返回是否周期性
+     *
+     * @return bool
      */
     public function isPeriodic(): bool
     {

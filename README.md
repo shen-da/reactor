@@ -64,14 +64,26 @@ composer require loner/reactor
 
         ```php
         # 增：秒数、回调、是否周期性
-        # Loner\Reactor\Timer\TimerInterface
-        $reactor->addTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface;
+        # Loner\Reactor\Timer\Timer
+        $reactor->addTimer(float $interval, callable $listener, bool $periodic = false): Timer;
           # 内部回调
-          $listener(TimerInterface $timer);
+          $listener(Timer $timer);
       
         # 删
-        $reactor->delTimer(TimerInterface $timer): bool;
+        $reactor->delTimer(Timer $timer): bool;
         ```
+  * 定时任务
+
+      ```php
+      # 增：回调、时间规则（分、时、日、月、周，缺省由 * 代替）
+      # Loner\Reactor\Crontab\Crontab
+      $reactor->addCrontab(callable $listener, string ...$timeRules): Crontab;
+        # 内部回调
+        $listener(Crontab $crontab);
+    
+      # 删
+      $reactor->delTimer(Crontab $crontab): bool;
+      ```
 * 事件轮询
 
     ```php

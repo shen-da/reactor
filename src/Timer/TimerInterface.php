@@ -12,7 +12,7 @@ namespace Loner\Reactor\Timer;
 interface TimerInterface
 {
     /**
-     * 返回间隔时间
+     * 返回间隔时间（微秒）
      *
      * @return float
      */

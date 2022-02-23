@@ -21,7 +21,7 @@ class TimerScheduler
     /**
      * 计时器列表
      *
-     * @var TimerInterface[]
+     * @var Timer[]
      */
     private array $timers = [];
 
@@ -62,9 +62,9 @@ class TimerScheduler
     /**
      * 添加计时器
      *
-     * @param TimerInterface $timer
+     * @param Timer $timer
      */
-    public function add(TimerInterface $timer): void
+    public function add(Timer $timer): void
     {
         $id = spl_object_hash($timer);
         $this->timers[$id] = $timer;
@@ -75,10 +75,10 @@ class TimerScheduler
     /**
      * 返回计时器是否被包含
      *
-     * @param TimerInterface $timer
+     * @param Timer $timer
      * @return bool
      */
-    public function contains(TimerInterface $timer): bool
+    public function contains(Timer $timer): bool
     {
         return isset($this->timers[spl_object_hash($timer)]);
     }
@@ -86,9 +86,9 @@ class TimerScheduler
     /**
      * 删除计时器
      *
-     * @param TimerInterface $timer
+     * @param Timer $timer
      */
-    public function del(TimerInterface $timer): void
+    public function del(Timer $timer): void
     {
         $id = spl_object_hash($timer);
         unset($this->timers[$id], $this->schedule[$id]);

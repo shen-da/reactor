@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Loner\Reactor;
 
-use Loner\Reactor\Timer\TimerInterface;
+use Loner\Reactor\Crontab\Crontab;
+use Loner\Reactor\Exception\CrontabFormatException;
+use Loner\Reactor\Timer\Timer;
 
 /**
  * 事件循环
@@ -58,9 +60,19 @@ interface ReactorInterface
      * @param float $interval
      * @param callable $listener
      * @param bool $periodic
-     * @return TimerInterface
+     * @return Timer
      */
-    public function addTimer(float $interval, callable $listener, bool $periodic = false): TimerInterface;
+    public function addTimer(float $interval, callable $listener, bool $periodic = false): Timer;
+
+    /**
+     * 添加定时任务侦听器
+     *
+     * @param callable $listener
+     * @param string ...$timeRules
+     * @return Crontab
+     * @return CrontabFormatException
+     */
+    public function addCrontab(callable $listener, string ...$timeRules): Crontab;
 
     /**
      * 移除读事件侦听器
@@ -89,10 +101,18 @@ interface ReactorInterface
     /**
      * 移除计时器事件侦听器
      *
-     * @param TimerInterface $timer
+     * @param Timer $timer
      * @return bool
      */
-    public function delTimer(TimerInterface $timer): bool;
+    public function delTimer(Timer $timer): bool;
+
+    /**
+     * 移除定时任务侦听器
+     *
+     * @param Crontab $crontab
+     * @return bool
+     */
+    public function delCrontab(Crontab $crontab): bool;
 
     /**
      * 主回路
