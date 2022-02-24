@@ -82,7 +82,7 @@ composer require loner/reactor
         $listener(Crontab $crontab);
     
       # 删
-      $reactor->delTimer(Crontab $crontab): bool;
+      $reactor->addCrontab(Crontab $crontab): bool;
       ```
 * 事件轮询
 
