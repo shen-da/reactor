@@ -95,14 +95,18 @@ class TimerScheduler
     }
 
     /**
-     * 获取计时器列表首个计划时间
+     * 获取下次触发剩余时间
      *
-     * @return float|false
+     * @return float|null
      */
-    public function getFirst(): float|false
+    public function howLong(): ?float
     {
         $this->sort();
-        return reset($this->schedule);
+        if (false === $atTime = reset($this->schedule)) {
+            return null;
+        }
+
+        return max($atTime - $this->getTime(), 0);
     }
 
     /**

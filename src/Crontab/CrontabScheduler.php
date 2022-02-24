@@ -12,6 +12,13 @@ namespace Loner\Reactor\Crontab;
 class CrontabScheduler
 {
     /**
+     * 上次检测时间
+     *
+     * @var int
+     */
+    private int $lastTime = 0;
+
+    /**
      * 定时任务列表
      *
      * @var Crontab[]
@@ -49,13 +56,30 @@ class CrontabScheduler
     }
 
     /**
-     * 依次执行触发的计时器回调
+     * 通过检索时间判断，并执行触发的定时任务回调
      */
     public function tick(): void
     {
-        $format = Crontab::getFormat();
+        $time = time();
+        if ($time - $this->lastTime < 60) {
+            return;
+        }
+
+        $this->lastTime = $time - ($time % 60);
+
+        $format = Crontab::getFormat($time);
         foreach ($this->crontab as $crontab) {
             $crontab->tick($format);
         }
+    }
+
+    /**
+     * 获取下次检索剩余时间
+     *
+     * @return int|null
+     */
+    public function howLong(): ?int
+    {
+        return $this->isEmpty() ? null : max($this->lastTime + 60 - time(), 0);
     }
 }

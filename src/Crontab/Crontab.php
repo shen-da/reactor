@@ -69,7 +69,7 @@ class Crontab
      * 获取时间指令规则
      *
      * @param string ...$times
-     * @return array<array|null>
+     * @return array
      * @throws CrontabFormatException
      */
     public static function timetable(string ...$times): array

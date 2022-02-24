@@ -239,28 +239,30 @@ class Select implements ReactorInterface
             $this->timerScheduler->tick();
             $this->crontabScheduler->tick();
 
-            // 循环状态异常，则流事件监听等待时间置0，立即判断并处理
+            // 上述时间性任务整体走完流程后，若循环状态异常，则立即处理流和信号事件
             if (!$this->looping) {
                 $timeout = 0;
-            } // 若有最近计时器，格式化流事件监听等待时间
-            elseif ($scheduledAt = $this->timerScheduler->getFirst()) {
-                $timeout = $scheduledAt - $this->timerScheduler->getTime();
-                if ($timeout > 0) {
-                    // 转为微秒、整型
-                    $timeout *= 1000000;
-                    $timeout = $timeout > PHP_INT_MAX ? PHP_INT_MAX : (int)$timeout;
-                } else {
-                    $timeout = 0;
-                }
-            } // 若有定时任务
-            elseif (!$this->crontabScheduler->isEmpty()) {
-                $timeout = 60 * 1000000;
-            } // 仅有待监听流或信号，则将流等待时间置空，代表尽可能大
-            elseif ($this->readStreams || $this->writeStreams || !$this->signalHandler->isEmpty()) {
+            } else {
+                // 默认流和信号事件监听等待时间不限制（阻塞等待）
                 $timeout = null;
-            } // 什么都没有，直接退出，防止死循环
-            else {
-                break;
+
+                // 有计时器计算触发剩余时间，缩短流和信号事件监听等待时间
+                if (null !== $howLong = $this->timerScheduler->howLong()) {
+                    $howLong *= 1000000;
+                    $timeout = $howLong > PHP_INT_MAX ? PHP_INT_MAX : (int)$howLong;
+                }
+
+                // 有定时任务检测剩余时间，缩短流和信号事件监听等待时间
+                if (null !== $howLong = $this->crontabScheduler->howLong()) {
+                    $howLong *= 1000000;
+                    $timeout = $timeout ?? PHP_INT_MAX;
+                    $timeout = $howLong > $timeout ? $timeout : (int)$howLong;
+                }
+
+                // 没有计时器和定时任务，也没有读写流、信号，直接跳出循环（避免空闲死循环）
+                if ($timeout === null && !$this->readStreams && !$this->writeStreams && $this->signalHandler->isEmpty()) {
+                    break;
+                }
             }
 
             $this->listenToStreamOrSignal($timeout);
@@ -288,7 +290,7 @@ class Select implements ReactorInterface
         if ($read || $write) {
             $changed = $this->streamSelect($read, $write, $timeout);
         } else {
-            // 存在计时器，睡眠到触发时间
+            // 存在计时器或定时任务，睡眠到触发时间
             if ($timeout > 0) {
                 usleep($timeout);
             } // 仅有信号侦听，长眠
